@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const titles = ["IP ADDRESS", "LOCATION", "TIMEZONE", "ISP"];
     const responses = ["ip", "location", "timezone", "isp"];
 
-
     titles.forEach((title, index) => {
         const box = document.createElement('div');
         box.classList.add('box');
@@ -26,18 +25,29 @@ document.addEventListener('DOMContentLoaded', () => {
         ipBox.appendChild(box);
     });
 
+    function isValidIP(ip) {
+        const ipPattern = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+        return ipPattern.test(ip);
+    }
+
     function search() {
         const ipOrDomain = searchInput.value;
+        let url;
+
         if (ipOrDomain) {
-            fetch(`https://geo.ipify.org/api/v2/country,city?apiKey=${apiKey}&ipAddress=${ipOrDomain}`)
+            if (isValidIP(ipOrDomain)) {
+                url = `https://geo.ipify.org/api/v2/country,city?apiKey=${apiKey}&ipAddress=${ipOrDomain}`;
+            } else {
+                url = `https://geo.ipify.org/api/v2/country,city?apiKey=${apiKey}&domain=${ipOrDomain}`;
+            }
+
+            fetch(url)
                 .then(response => response.json())
                 .then(data => {
-
                     document.getElementById('response-ip').textContent = data.ip;
                     document.getElementById('response-location').textContent = `${data.location.region}, ${data.location.country}`;
                     document.getElementById('response-timezone').textContent = `UTC ${data.location.timezone}`;
                     document.getElementById('response-isp').textContent = data.isp;
-
 
                     updateMap(data.location.lat, data.location.lng);
                 })
@@ -59,8 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-
-    const map = L.map('map').setView([51.505, -0.09], 13); 
+    const map = L.map('map').setView([51.505, -0.09], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
@@ -70,14 +79,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (marker) {
             map.removeLayer(marker);
         }
-        
-      
-        const offsetLatLng = [lat + 0.005, lng]; 
 
-
+        const offsetLatLng = [lat + 0.005, lng];
         map.setView(offsetLatLng, 13);
-
-
         marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
     }
 

@@ -127,7 +127,7 @@ textarea {
     content: "";
     background: rgba(0, 0, 0, 0.233); 
     position: absolute;
-    left: 0; 
+    left: 0;
     transform: translateX(-50%);
     height: 45%;
     width: 0.1px; 
